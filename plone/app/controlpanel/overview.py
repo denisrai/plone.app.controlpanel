@@ -80,21 +80,6 @@ class OverviewControlPanel(ControlPanelView):
             return False
         return True
 
-    def timezone_warning(self):
-        if not HAS_PAE:
-            return False
-        portal_timezone = None
-        reg = queryUtility(IRegistry, context=self.context, default=None)
-        if reg:
-            portal_timezone = reg.forInterface(
-                IEventSettings,
-                prefix="plone.app.event",
-                check=False  # Don't fail, if portal_timezone isn't set.
-            ).portal_timezone
-        if portal_timezone:
-            return False
-        return True
-
     def categories(self):
         return self.cptool().getGroups()
 

@@ -60,26 +60,6 @@
     </div>
 
     <div class="portalMessage warning"
-        tal:condition="view/timezone_warning">
-        <strong i18n:translate="">
-            Warning
-        </strong>
-        <span tal:omit-tag="" i18n:translate="text_no_timezone_configured">
-
-            You have not set the portal timezone. Date handling will not work
-            properly for timezone aware date/time values.
-            Go to the
-            <tal:link i18n:name="label_mail_event_settings_link">
-                <a href=""
-                   i18n:translate="text_no_timezone_configured_control_panel_link"
-                   tal:attributes="href string:${portal_url}/@@event-settings"
-                >Event settings control panel</a>
-            </tal:link>
-            to fix this.
-        </span>
-    </div>
-
-    <div class="portalMessage warning"
         tal:condition="not:view/pil">
         <strong i18n:translate="">
             Warning
