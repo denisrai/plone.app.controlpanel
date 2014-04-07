@@ -319,7 +319,6 @@ class UsersOverviewControlPanel(UsersGroupsControlPanelView):
                     # don't allow adding or removing the Manager role
                     if ('Manager' in roles) != ('Manager' in current_roles):
                         raise Forbidden
-
                 acl_users.userFolderEditUser(user.id, pw, roles, member.getDomains(), REQUEST=context.REQUEST)
                 if pw:
                     context.REQUEST.form['new_password'] = pw
@@ -597,10 +596,18 @@ class GroupMembershipControlPanel(UsersGroupsControlPanelView):
 
         form = self.request.form
         submitted = form.get('form.submitted', False)
-
+        
+        all_members = form.get('showallmembers', False)
+        if all_members:
+            if int(all_members): all_members = True
+        
         self.searchResults = []
         self.searchString = ''
         self.newSearch = False
+        self.limitQtdMembers = 50
+        self.usernameMembers = self.gtool.getGroupMembers(self.groupname)
+        self.countMembers = len(self.usernameMembers)
+        self.groupMembers = self.getMembers(all_members)
 
         if submitted:
             # add/delete before we search so we don't show stale results
@@ -620,16 +627,21 @@ class GroupMembershipControlPanel(UsersGroupsControlPanelView):
                 self.context.plone_utils.addPortalMessage(_(u'Changes made.'))
 
             search = form.get('form.button.Search', None) is not None
-            findAll = form.get('form.button.FindAll', None) is not None and not self.many_users
-            self.searchString = not findAll and form.get('searchstring', '') or ''
-            if findAll or self.searchString != '':
+            edit = form.get('form.button.Edit', None) is not None and toDelete
+            add = form.get('form.button.Add', None) is not None and toAdd
+            findAll = form.get('form.button.FindAll', None) is not None and \
+                not self.many_users
+            # The search string should be cleared when one of the
+            # non-search buttons has been clicked.
+            if findAll or edit or add:
+                form['searchstring'] = ''
+            self.searchString = form.get('searchstring', '')
+            if findAll or bool(self.searchString):
                 self.searchResults = self.getPotentialMembers(self.searchString)
 
             if search or findAll:
                 self.newSearch = True
-
-        self.groupMembers = self.getMembers()
-
+        
     def __call__(self):
         self.update()
         return self.index()
@@ -637,8 +649,13 @@ class GroupMembershipControlPanel(UsersGroupsControlPanelView):
     def isGroup(self, itemName):
         return self.gtool.isGroup(itemName)
 
-    def getMembers(self):
-        searchResults = self.gtool.getGroupMembers(self.groupname)
+    def getMembers(self, all_members=False):
+#         searchResults = self.gtool.getGroupMembers(self.groupname)
+        searchResults = self.usernameMembers
+        
+        if self.countMembers > self.limitQtdMembers and \
+           not all_members:
+            return []
 
         groupResults = [self.gtool.getGroupById(m) for m in searchResults]
         groupResults.sort(key=lambda x: x is not None and normalizeString(x.getGroupTitleOrName()))
