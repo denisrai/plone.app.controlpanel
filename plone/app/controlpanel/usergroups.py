@@ -597,18 +597,19 @@ class GroupMembershipControlPanel(UsersGroupsControlPanelView):
         form = self.request.form
         submitted = form.get('form.submitted', False)
         
-        all_members = form.get('showallmembers', False)
-        if all_members:
-            if int(all_members): all_members = True
+        complete_members = form.get('completemembers', False)
+        if complete_members:
+            if int(complete_members): complete_members = True
         
         self.searchResults = []
         self.searchString = ''
         self.newSearch = False
         self.limitQtdMembers = 50
+        
         self.usernameMembers = self.gtool.getGroupMembers(self.groupname)
         self.countMembers = len(self.usernameMembers)
-        self.groupMembers = self.getMembers(all_members)
-
+        self.groupMembers = self.getMembers(complete_members)
+        
         if submitted:
             # add/delete before we search so we don't show stale results
             toAdd = form.get('add', [])
@@ -649,12 +650,12 @@ class GroupMembershipControlPanel(UsersGroupsControlPanelView):
     def isGroup(self, itemName):
         return self.gtool.isGroup(itemName)
 
-    def getMembers(self, all_members=False):
+    def getMembers(self, complete_members):
 #         searchResults = self.gtool.getGroupMembers(self.groupname)
         searchResults = self.usernameMembers
         
         if self.countMembers > self.limitQtdMembers and \
-           not all_members:
+           not complete_members:
             return []
 
         groupResults = [self.gtool.getGroupById(m) for m in searchResults]
