@@ -650,7 +650,7 @@ class GroupMembershipControlPanel(UsersGroupsControlPanelView):
     def isGroup(self, itemName):
         return self.gtool.isGroup(itemName)
 
-    def getMembers(self, complete_members):
+    def getMembers(self, complete_members=False):
 #         searchResults = self.gtool.getGroupMembers(self.groupname)
         searchResults = self.usernameMembers
         
